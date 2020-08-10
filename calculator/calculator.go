@@ -25,7 +25,8 @@ func (c *DiscountCalculator) Calculate(purchaseAmount int) int {
 	// }
 
 	if purchaseAmount > c.minimumPurchaseAmount {
-		return purchaseAmount - c.discountAmount
+		multiplier := purchaseAmount / c.minimumPurchaseAmount
+		return purchaseAmount - (c.discountAmount * multiplier)
 	}
 
 	return purchaseAmount

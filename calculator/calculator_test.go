@@ -2,20 +2,27 @@ package calculator
 
 import "testing"
 
-func TestDiscountApplied(t *testing.T) {
-	calculator := NewDiscountCalculator(100, 20)
-	amount := calculator.Calculate(150)
-
-	if amount != 130 {
-		t.Fatal()
+func TestDiscountCalculator(t *testing.T) {
+	type testCase struct {
+		minimumPurchaseAmount int
+		discount              int
+		purchaseAmount        int
+		exepectedAmount       int
 	}
-}
 
-func TestDiscountNotApplied(t *testing.T) {
-	calculator := NewDiscountCalculator(100, 20)
-	amount := calculator.Calculate(60)
+	testCases := []testCase{
+		{minimumPurchaseAmount: 100, discount: 20, purchaseAmount: 150, exepectedAmount: 130},
+		{minimumPurchaseAmount: 100, discount: 20, purchaseAmount: 200, exepectedAmount: 160},
+		{minimumPurchaseAmount: 100, discount: 20, purchaseAmount: 350, exepectedAmount: 290},
+		{minimumPurchaseAmount: 100, discount: 20, purchaseAmount: 50, exepectedAmount: 50},
+	}
 
-	if amount != 50 {
-		t.Errorf("exepected 50, got %v", amount)
+	for _, tc := range testCases {
+		calculator := NewDiscountCalculator(tc.minimumPurchaseAmount, tc.discount)
+		amount := calculator.Calculate(tc.purchaseAmount)
+
+		if amount != tc.exepectedAmount {
+			t.Errorf("exepected %v, got %v", tc.exepectedAmount, amount)
+		}
 	}
 }
