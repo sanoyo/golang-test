@@ -1,32 +1,74 @@
 package calculator
 
-import "testing"
+import (
+	"testing"
 
-type DiscountRepositoryMock struct{}
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+)
+
+type DiscountRepositoryMock struct {
+	// DiscountValue int
+	mock.Mock
+}
 
 func (drm DiscountRepositoryMock) FindCurrentDiscount() int {
-	return 20
+	args := drm.Called()
+	return args.Int(0)
 }
 
 func TestDiscountCalculator(t *testing.T) {
 	type testCase struct {
 		name                  string
 		minimumPurchaseAmount int
-		discount              int
 		purchaseAmount        int
+		discount              int
 		exepectedAmount       int
 	}
 
 	testCases := []testCase{
-		{name: "should apply 20", minimumPurchaseAmount: 100, purchaseAmount: 150, exepectedAmount: 130},
-		{name: "should apply 40", minimumPurchaseAmount: 100, purchaseAmount: 200, exepectedAmount: 160},
-		{name: "should apply 60", minimumPurchaseAmount: 100, purchaseAmount: 350, exepectedAmount: 290},
-		{name: "should not apply", minimumPurchaseAmount: 100, purchaseAmount: 50, exepectedAmount: 50},
+		{
+			name:                  "should apply 20",
+			minimumPurchaseAmount: 100,
+			purchaseAmount:        150,
+			discount:              20,
+			exepectedAmount:       130,
+		},
+		{
+			name:                  "should apply 40",
+			minimumPurchaseAmount: 100,
+			purchaseAmount:        200,
+			discount:              20,
+			exepectedAmount:       160,
+		},
+		{
+			name:                  "should apply 60",
+			minimumPurchaseAmount: 100,
+			purchaseAmount:        350,
+			discount:              20,
+			exepectedAmount:       290,
+		},
+		{
+			name:                  "should not apply",
+			minimumPurchaseAmount: 100,
+			purchaseAmount:        50,
+			discount:              20,
+			exepectedAmount:       50,
+		},
+		{
+			name:                  "should not apply when discount zero",
+			minimumPurchaseAmount: 100,
+			purchaseAmount:        50,
+			discount:              0,
+			exepectedAmount:       50,
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			discountRepositoryMock := DiscountRepositoryMock{}
+			discountRepositoryMock.On("FindCurrentDiscount").Return(tc.discount)
+
 			calculator, err := NewDiscountCalculator(tc.minimumPurchaseAmount, discountRepositoryMock)
 			if err != nil {
 				// FailNow + log
@@ -34,9 +76,7 @@ func TestDiscountCalculator(t *testing.T) {
 			}
 			amount := calculator.Calculate(tc.purchaseAmount)
 
-			if amount != tc.exepectedAmount {
-				t.Errorf("exepected %v, got %v", tc.exepectedAmount, amount)
-			}
+			assert.Equal(t, tc.exepectedAmount, amount)
 		})
 	}
 }
