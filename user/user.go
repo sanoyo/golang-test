@@ -21,7 +21,6 @@ func NewUserService(userRepository database.User, badWordsRepository database.Ba
 }
 
 func (c *UserService) Register(user entity.User) error {
-
 	badWords, err := c.badWordsRepository.FindAll()
 	if err != nil {
 		return err
